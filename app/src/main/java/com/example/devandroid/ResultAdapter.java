@@ -1,5 +1,6 @@
 package com.example.devandroid; // À adapter
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,11 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
     private JSONArray dataArray = new JSONArray();
     private boolean isDepartementList = false;
 
+    public ResultAdapter() {
+    }
+
     // Met à jour les données et rafraîchit la liste
+    @SuppressLint("NotifyDataSetChanged")
     public void setData(JSONArray dataArray, boolean isDepartementList) {
         this.dataArray = dataArray;
         this.isDepartementList = isDepartementList;
@@ -29,6 +34,7 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ViewHolder
         return new ViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         try {
