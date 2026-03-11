@@ -9,4 +9,11 @@
     <string name="btn_search_name">Rechercher par nom</string>
 
     <string name="btn_list_depts">Voir tous les départements</string>
+    <string name="recherche_gsb">Recherche GSB</string>
+    <string name="voir_tous_les_d_partements">Voir tous les départements</string>
+    <string name="chercher_par_d_partement">Chercher par département</string>
+    <string name="chercher_par_nom">Chercher par nom</string>
+    <string name="n_d_partement_ex_29">N° département (ex: 29)</string>
+    <string name="nom_du_praticien_ex_cha">Nom du praticien (ex: cha)</string>
+    <string name="les_r_sultats_s_afficheront_ici">Les résultats s\'afficheront ici...</string>
 </resources>

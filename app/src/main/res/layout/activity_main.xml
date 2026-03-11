@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -8,7 +9,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Recherche GSB"
+        android:text="@string/recherche_gsb"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
@@ -17,34 +18,46 @@
         android:id="@+id/et_department"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="N° département (ex: 29)"
-        android:inputType="number" />
+        android:autofillHints=""
+        android:hint="@string/n_d_partement_ex_29"
+        android:inputType="number"
+        android:minHeight="48dp"
+        android:textColorHint="#8D6E63"
+        tools:ignore="VisualLintTextFieldSize" />
 
     <Button
         android:id="@+id/btn_search_dept"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Chercher par département" />
+        android:autofillHints=""
+        android:importantForAutofill="no"
+        android:text="@string/chercher_par_d_partement"
+        tools:ignore="VisualLintButtonSize" />
 
     <EditText
         android:id="@+id/et_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nom du praticien (ex: cha)"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp"
+        android:hint="@string/nom_du_praticien_ex_cha"
+        android:minHeight="48dp"
+        android:textColorHint="#8D6E63"
+        tools:ignore="Autofill,TextFields,VisualLintTextFieldSize" />
 
     <Button
         android:id="@+id/btn_search_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Chercher par nom" />
+        android:text="@string/chercher_par_nom"
+        tools:ignore="VisualLintButtonSize" />
 
     <Button
         android:id="@+id/btn_list_depts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Voir tous les départements"
-        android:layout_marginTop="8dp" />
+        android:text="@string/voir_tous_les_d_partements"
+        android:layout_marginTop="8dp"
+        tools:ignore="VisualLintButtonSize" />
 
     <View
         android:layout_width="match_parent"
@@ -61,7 +74,7 @@
             android:id="@+id/tv_results"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Les résultats s'afficheront ici..."
+            android:text="@string/les_r_sultats_s_afficheront_ici"
             android:textSize="16sp"
             android:textColor="@android:color/black"/>
     </ScrollView>
