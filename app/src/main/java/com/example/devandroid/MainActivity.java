@@ -1,124 +1,139 @@
-package com.example.devandroid; // Remplacez par votre vrai nom de package
+package com.example.devandroid; // À adapter
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-// Imports nécessaires pour Volley et le JSON
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
+/**
+ * L'activité principale de l'application.
+ * <p>
+ * Cette activité permet aux utilisateurs de rechercher des praticiens par nom ou par numéro de département,
+ * ainsi que de lister l'ensemble des départements disponibles. Les données sont récupérées depuis
+ * une API distante via la bibliothèque réseau Volley et affichées dans un {@link RecyclerView}.
+ * </p>
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private EditText etDepartment, etName;
-    private TextView tvResults; // Notre zone d'affichage
-    private RequestQueue requestQueue; // File d'attente pour Volley
+    /** Champ de saisie pour la recherche (nom ou numéro de département). */
+    private EditText etSearch;
 
+    /** Barre de progression affichée lors des requêtes réseau. */
+    private ProgressBar progressBar;
+
+    /** Texte affiché lorsqu'aucun résultat n'est trouvé ou en cas d'erreur. */
+    private TextView tvEmptyState;
+
+    /** Liste déroulante pour afficher les résultats de la recherche. */
+    private RecyclerView recyclerView;
+
+    /** File d'attente pour gérer les requêtes HTTP via Volley. */
+    private RequestQueue requestQueue;
+
+    /** Adaptateur chargé de lier les données JSON aux vues du RecyclerView. */
+    private ResultAdapter adapter;
+
+    /** L'URL de base de l'API GSB. */
     private static final String BASE_URL = "https://gsb.siochaptalqper.fr/";
 
+    /**
+     * Méthode appelée lors de la création de l'activité.
+     * Initialise les composants de l'interface utilisateur, configure le {@link RecyclerView},
+     * initialise la file de requêtes Volley et définit les écouteurs de clics pour les boutons.
+     *
+     * @param savedInstanceState Si l'activité est réinitialisée après avoir été arrêtée,
+     *                           ce Bundle contient les données les plus récentes fournies par
+     *                           onSaveInstanceState. Sinon, il est null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         // Initialisation des vues
-        etDepartment = findViewById(R.id.et_department);
-        etName = findViewById(R.id.et_name);
-        Button btnSearchDept = findViewById(R.id.btn_search_dept);
-        Button btnSearchName = findViewById(R.id.btn_search_name);
+        etSearch = findViewById(R.id.et_search);
+        Button btnSearch = findViewById(R.id.btn_search);
         Button btnListDepts = findViewById(R.id.btn_list_depts);
-        tvResults = findViewById(R.id.tv_results);
+        progressBar = findViewById(R.id.progress_bar);
+        tvEmptyState = findViewById(R.id.tv_empty_state);
+        recyclerView = findViewById(R.id.recycler_view);
 
-        // Initialisation de Volley
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        adapter = new ResultAdapter();
+
+        recyclerView.setAdapter(adapter);
         requestQueue = Volley.newRequestQueue(this);
 
-        btnSearchDept.setOnClickListener(v -> {
-            String dept = etDepartment.getText().toString().trim();
-            if (!dept.isEmpty()) {
-                fetchDataFromApi(BASE_URL + "praticiens/numdep/" + dept);
-            } else {
-                Toast.makeText(MainActivity.this, "Saisissez un département", Toast.LENGTH_SHORT).show();
+        btnSearch.setOnClickListener(v -> {
+            String query = etSearch.getText().toString().trim();
+
+            if (query.isEmpty()) {
+                Toast.makeText(this, "Veuillez saisir une recherche", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Si la chaîne ne contient que des chiffres (ex: "29", "75")
+            if (query.matches("\\d+")) {
+                fetchData(BASE_URL + "praticiens/numdep/" + query, false);
+            }
+            // Sinon, c'est considéré comme une recherche par nom (ex: "cha")
+            else {
+                fetchData(BASE_URL + "praticiens/nom/" + query, false);
             }
         });
 
-        btnSearchName.setOnClickListener(v -> {
-            String name = etName.getText().toString().trim();
-            if (!name.isEmpty()) {
-                fetchDataFromApi(BASE_URL + "praticiens/nom/" + name);
-            } else {
-                Toast.makeText(MainActivity.this, "Saisissez un nom", Toast.LENGTH_SHORT).show();
-            }
+        // Afficher tous les départements reste identique
+        btnListDepts.setOnClickListener(v -> {
+            etSearch.setText(""); // On vide le champ de recherche pour plus de clarté
+            fetchData(BASE_URL + "departements", true);
         });
-
-        btnListDepts.setOnClickListener(v -> fetchDataFromApi(BASE_URL + "departements"));
     }
 
-    @SuppressLint("SetTextI18n")
-    private void fetchDataFromApi(String url) {
-        tvResults.setText("Chargement en cours...");
+    /**
+     * Effectue une requête HTTP GET à l'URL spécifiée pour récupérer des données JSON.
+     * Gère l'affichage de la barre de progression pendant le chargement et met à jour
+     * l'interface utilisateur (succès, état vide ou erreur réseau) une fois la réponse reçue.
+     *
+     * @param url               L'URL complète de l'endpoint de l'API à interroger.
+     * @param isDepartementList Un booléen indiquant la nature des données attendues :
+     *                          {@code true} si l'on attend une liste de départements,
+     *                          {@code false} si l'on attend une liste de praticiens.
+     *                          Ce paramètre est transmis à l'adaptateur pour adapter l'affichage.
+     */
+    private void fetchData(String url, boolean isDepartementList) {
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        tvEmptyState.setVisibility(View.GONE);
 
-        // Création de la requête JSON (Array car l'API renvoie un tableau [...])
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        StringBuilder sb = new StringBuilder();
-                        try {
-                            if (response.length() == 0) {
-                                tvResults.setText("Audun résultat trouvé.");
-                                return;
-                            }
-
-                            // On parcourt le tableau JSON
-                            for (int i = 0; i < response.length(); i++) {
-                                JSONObject obj = response.getJSONObject(i);
-
-                                // Si c'est une recherche de praticien
-                                if (obj.has("PRA_NOM")) {
-                                    String nom = obj.getString("PRA_NOM");
-                                    String prenom = obj.getString("PRA_PRENOM");
-                                    String ville = obj.getString("PRA_VILLE");
-                                    String specialite = obj.getString("TYP_LIBELLE");
-
-                                    sb.append("- ").append(nom.toUpperCase()).append(" ").append(prenom).append("\n");
-                                    sb.append("  Spécialité : ").append(specialite).append("\n");
-                                    sb.append("  Ville : ").append(ville).append("\n\n");
-                                }
-                                // Si c'est la liste des départements
-                                else if (obj.has("DEPARTEMENT")) {
-                                    String dept = obj.getString("DEPARTEMENT");
-                                    sb.append("Département : ").append(dept).append("\n");
-                                }
-                            }
-                            // Affichage dans le TextView
-                            tvResults.setText(sb.toString());
-
-                        } catch (JSONException e) {
-                            tvResults.setText("Erreur lors de la lecture des données.");
-                            e.printStackTrace();
-                        }
+                response -> {
+                    progressBar.setVisibility(View.GONE);
+                    if (response.length() == 0) {
+                        tvEmptyState.setText("Aucun résultat trouvé.");
+                        tvEmptyState.setVisibility(View.VISIBLE);
+                    } else {
+                        recyclerView.setVisibility(View.VISIBLE);
+                        adapter.setData(response, isDepartementList);
                     }
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        tvResults.setText("Erreur réseau : " + error.getMessage());
-                    }
+                error -> {
+                    progressBar.setVisibility(View.GONE);
+                    tvEmptyState.setText("Erreur réseau : " + error.getMessage());
+                    tvEmptyState.setVisibility(View.VISIBLE);
                 });
 
-        // Ajout de la requête à la file d'attente pour exécution
         requestQueue.add(request);
     }
 }

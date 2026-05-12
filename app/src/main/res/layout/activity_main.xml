@@ -1,82 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#F5F5F5">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/recherche_gsb"
-        android:textSize="20sp"
+        android:text="Annuaire GSB"
+        android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
+        android:textColor="#3F51B5"
+        android:layout_marginBottom="16dp"
+        android:gravity="center"/>
 
-    <EditText
-        android:id="@+id/et_department"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints=""
-        android:hint="@string/n_d_partement_ex_29"
-        android:inputType="number"
-        android:minHeight="48dp"
-        android:textColorHint="#8D6E63"
-        tools:ignore="VisualLintTextFieldSize" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
 
-    <Button
-        android:id="@+id/btn_search_dept"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints=""
-        android:importantForAutofill="no"
-        android:text="@string/chercher_par_d_partement"
-        tools:ignore="VisualLintButtonSize" />
+        <EditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="N° département ou Nom (ex: 29 ou cha)"
+            android:inputType="text" />
 
-    <EditText
-        android:id="@+id/et_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="@string/nom_du_praticien_ex_cha"
-        android:minHeight="48dp"
-        android:textColorHint="#8D6E63"
-        tools:ignore="Autofill,TextFields,VisualLintTextFieldSize" />
-
-    <Button
-        android:id="@+id/btn_search_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/chercher_par_nom"
-        tools:ignore="VisualLintButtonSize" />
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chercher" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btn_list_depts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/voir_tous_les_d_partements"
-        android:layout_marginTop="8dp"
-        tools:ignore="VisualLintButtonSize" />
+        android:text="Afficher tous les départements"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_marginBottom="16dp"/>
 
-    <View
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/tv_empty_state"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@android:color/darker_gray"
-        android:layout_marginVertical="16dp"/>
+        android:layout_height="wrap_content"
+        android:text="Aucun résultat à afficher."
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        android:visibility="visible"/>
 
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <TextView
-            android:id="@+id/tv_results"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/les_r_sultats_s_afficheront_ici"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"/>
-    </ScrollView>
-
+        android:layout_weight="1"
+        android:visibility="gone"/>
 </LinearLayout>
