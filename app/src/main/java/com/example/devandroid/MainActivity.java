@@ -16,19 +16,46 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 
+/**
+ * L'activité principale de l'application.
+ * <p>
+ * Cette activité permet aux utilisateurs de rechercher des praticiens par nom ou par numéro de département,
+ * ainsi que de lister l'ensemble des départements disponibles. Les données sont récupérées depuis
+ * une API distante via la bibliothèque réseau Volley et affichées dans un {@link RecyclerView}.
+ * </p>
+ */
 public class MainActivity extends AppCompatActivity {
 
-    // NOUVEAU : Un seul EditText et un seul bouton de recherche
+    /** Champ de saisie pour la recherche (nom ou numéro de département). */
     private EditText etSearch;
+
+    /** Barre de progression affichée lors des requêtes réseau. */
     private ProgressBar progressBar;
+
+    /** Texte affiché lorsqu'aucun résultat n'est trouvé ou en cas d'erreur. */
     private TextView tvEmptyState;
+
+    /** Liste déroulante pour afficher les résultats de la recherche. */
     private RecyclerView recyclerView;
 
+    /** File d'attente pour gérer les requêtes HTTP via Volley. */
     private RequestQueue requestQueue;
+
+    /** Adaptateur chargé de lier les données JSON aux vues du RecyclerView. */
     private ResultAdapter adapter;
 
+    /** L'URL de base de l'API GSB. */
     private static final String BASE_URL = "https://gsb.siochaptalqper.fr/";
 
+    /**
+     * Méthode appelée lors de la création de l'activité.
+     * Initialise les composants de l'interface utilisateur, configure le {@link RecyclerView},
+     * initialise la file de requêtes Volley et définit les écouteurs de clics pour les boutons.
+     *
+     * @param savedInstanceState Si l'activité est réinitialisée après avoir été arrêtée,
+     *                           ce Bundle contient les données les plus récentes fournies par
+     *                           onSaveInstanceState. Sinon, il est null.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         requestQueue = Volley.newRequestQueue(this);
 
-        // NOUVEAU : Logique de la recherche intelligente
         btnSearch.setOnClickListener(v -> {
             String query = etSearch.getText().toString().trim();
 
@@ -75,6 +101,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Effectue une requête HTTP GET à l'URL spécifiée pour récupérer des données JSON.
+     * Gère l'affichage de la barre de progression pendant le chargement et met à jour
+     * l'interface utilisateur (succès, état vide ou erreur réseau) une fois la réponse reçue.
+     *
+     * @param url               L'URL complète de l'endpoint de l'API à interroger.
+     * @param isDepartementList Un booléen indiquant la nature des données attendues :
+     *                          {@code true} si l'on attend une liste de départements,
+     *                          {@code false} si l'on attend une liste de praticiens.
+     *                          Ce paramètre est transmis à l'adaptateur pour adapter l'affichage.
+     */
     private void fetchData(String url, boolean isDepartementList) {
         progressBar.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
